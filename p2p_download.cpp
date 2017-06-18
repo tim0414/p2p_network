@@ -91,8 +91,10 @@ void p2p_download::normal_download(int sockfd, char *filename){
 	char sendline[1024], recvline[2048], buffer[1024];
 	int nCount;
 	//sprintf(temp_file, "%d", no);
+	char filename2[64];
+	read(sockfd, filename, strlen(filename2)+1);
 
-	printf("start p2p download, filename %s\n", filename);
+	printf("start p2p download, filename %s\n", filename2);
 
 	//int success = write(sockfd, &total, sizeof(total));
 
@@ -100,9 +102,9 @@ void p2p_download::normal_download(int sockfd, char *filename){
 
 	chdir("file");
 
-	fp1 = fopen(filename, "wb");
+	fp1 = fopen(filename2, "wb");
 
-	printf("p2p filename: %s\n", filename);
+	printf("p2p filename: %s\n", filename2);
 
 	int i = 0;
 	memset(&recvline, 0, sizeof(recvline));
