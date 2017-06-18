@@ -339,7 +339,9 @@ static void *send_download_cmd(void *arg){
     
     send(sockfd, "test", strlen("test")+1, 0);
     char over[12] = "endfile";
+    int size = 0;
 	send(sockfd, over, strlen(over), 0);
+    send(sockfd, &size, sizeof(size), 0);
     //file_exist(sockfd);
     send(sockfd, "download\n", strlen("download\n")+1, 0);
     send(sockfd, filename, strlen(filename)+1, 0);
