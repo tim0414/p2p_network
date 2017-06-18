@@ -334,7 +334,9 @@ static void *send_download_cmd(void *arg){
     printf("before call download fileanem: %s\n", filename);
 
     p2p_download dl;
-    sprintf(filename, "%s", "cover.jpeg");
+    memset(&filename, 0, sizeof(filename));
+    recv(connfd, filename, strlen(filename), 0);
+    //sprintf(filename, "%s", "cover.jpeg");
     dl.normal_download(connfd, filename);
 
 /*
