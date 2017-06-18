@@ -334,8 +334,8 @@ static void *send_download_cmd(void *arg){
     printf("before call download fileanem: %s\n", filename);
 
     p2p_download dl;
-    //memset(&filename, 0, sizeof(filename));
-    read(connfd, filename, strlen(filename)+1);
+    memset(&filename, 0, sizeof(filename));
+    //read(connfd, filename, strlen(filename)+1);
     sprintf(filename, "%s", "cover.jpeg");
     dl.normal_download(connfd, filename);
 
@@ -434,6 +434,7 @@ static void *download_from_client(void *arg){
 		}
 		
 		pthread_create(&tid, NULL, &send_download_cmd, (void*)&addr);
+		pthread_join(tid, NULL);
 		
 	}
 
@@ -568,7 +569,7 @@ void cmd(int sockfd){
             up2client.client_init();
             int upsock = up2client.connect_to_server();
             printf("filename :%s\n", filename);
-            send(upsock, filename, strlen(filename)+1, 0);
+            //send(upsock, filename, strlen(filename)+1, 0);
             upload upcmd;
             upcmd.upload_file(upsock, filename);
 			printf("upload complete\n");
