@@ -56,11 +56,26 @@ void renew_file_list(char*ip, char* filename, int size){
 	struct file_info new_file;
 	sprintf(new_file.filename, "%s", filename);
 	new_file.size = size;
-	
+
 	list<struct user>::iterator iter;
-	for(iter=userfile.begin(); iter!=userfile.end(); iter++){
-		if(strcmp(iter->ip, ip)==0){
-			iter->file.push_back(new_file);
+
+	if(size==0){
+		for(iter=userfile.begin(); iter!=userfile.end(); iter++){
+			if(strcmp(iter->ip, ip)==0){
+				list<struct file_info>::iterator iter2;
+					for(iter2=iter->file.begin(); iter2!=iter->file.end(); iter2++){
+						if(srecmp(iter2->filename, filename)==0){
+							iter.erase(iter2++);
+						}
+					}
+				
+			}
+		}
+	} else{
+		for(iter=userfile.begin(); iter!=userfile.end(); iter++){
+			if(strcmp(iter->ip, ip)==0){
+				iter->file.push_back(new_file);
+			}
 		}
 	}
 	
@@ -569,6 +584,15 @@ void cmd(int connfd, int no, char* ip){
 		// show cmd
 		} else if(strcmp(cmd, "show\n") == 0){
 			show(connfd);
+			continue; 
+
+		// remove cmd
+		}else if(strcmp(cmd, "rm\n")==0){
+			read(connfd, filename, 1024);
+			int size = 0;
+
+
+			renew_file_list(ip, filename, size);
 			continue; 
 
 		// over connect

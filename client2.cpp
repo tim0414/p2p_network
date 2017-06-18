@@ -41,13 +41,14 @@ char server_ip[128];
 int server_port;
 
 static void *p2p_connect(void *arg){
-	struct sockaddr_in addr_svr;
+	pthread_detach(pthread_self());
+    struct sockaddr_in addr_svr;
 	int sockfd;
 	uint16_t port = 9999;
 	struct p2p_info *info = (struct p2p_info *)arg;
 	char ip_num[1024];
 	strcpy(ip_num, info->ip);
-	pthread_detach(pthread_self());
+	
 	//free(arg);
 
 	printf("filename: %s, ip %s\n", info->filename, ip_num);
