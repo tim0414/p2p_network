@@ -534,6 +534,7 @@ void cmd(int connfd, int no, char* ip){
 		//printf("start reading cmd\n");
 		memset(&cmd, 0, sizeof(cmd));
 		read(connfd, cmd, 1024);
+		printf("cmd is %s\n", cmd);
 
 		// download cmd
 		if(strcmp(cmd, "download\n") == 0){
