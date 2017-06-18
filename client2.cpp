@@ -570,6 +570,7 @@ void cmd(int sockfd){
             printf("filename :%s\n", filename);
             send(upsock, filename, strlen(filename)+1, 0);
             upload upcmd;
+			sprintf(filename, "%s", "downloadfile");
             upcmd.upload_file(upsock, filename);
 			printf("upload complete\n");
             //send(upsock, filename, strlen(filename)+1, 0);
