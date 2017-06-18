@@ -64,8 +64,8 @@ void renew_file_list(char*ip, char* filename, int size){
 			if(strcmp(iter->ip, ip)==0){
 				list<struct file_info>::iterator iter2;
 					for(iter2=iter->file.begin(); iter2!=iter->file.end(); iter2++){
-						if(srecmp(iter2->filename, filename)==0){
-							iter.erase(iter2++);
+						if(strcmp(iter2->filename, filename)==0){
+							iter->file.erase(iter2++);
 						}
 					}
 				
