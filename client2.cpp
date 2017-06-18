@@ -540,6 +540,9 @@ void cmd(int sockfd){
             char filename[64];
             int file_num;
 
+            memset(&filename, 0, sizeof(filename));
+            memset(&ip, 0, sizeof(ip));
+
             printf("please enter client ip: ");
             fgets(ip, 64, stdin);
 			if(ip[strlen(ip)-1] == '\n')
