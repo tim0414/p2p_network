@@ -235,6 +235,7 @@ void p2p_download(int sockfd, char *filename, int total, int no){
 }
 
 void *p2p_connect(void *arg){
+	pthread_detach(pthread_self());
 	struct sockaddr_in addr_svr;
 	int sockfd;
 	uint16_t port = 9999;
@@ -652,6 +653,7 @@ void file_record(int connfd, char *id, char *ip, int port, int no){
 
 
 static void *client(void *arg){
+	pthread_detach(pthread_self());
 	struct address *addr = (struct address *)arg;
 
 	int connfd;

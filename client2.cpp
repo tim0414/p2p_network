@@ -192,9 +192,9 @@ int download(int sockfd, char *filename){
 
 
 	printf("thread num %d\n", thread_num);
-	//for(int k=0; k<thread_num; k++){
-	//	pthread_join(tid[k], NULL);
-	//}
+	for(int k=0; k<thread_num; k++){
+		pthread_join(tid[k], NULL);
+	}
 
 	return file_num;
 
