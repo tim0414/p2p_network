@@ -330,7 +330,7 @@ static void *send_download_cmd(void *arg){
 	connfd = addr->sockfd;
     char filename[64];
 
-    recv(connfd, filename, strlen(filename), 0);
+    //recv(connfd, filename, strlen(filename), 0);
     printf("before call download fileanem: %s\n", filename);
 
     p2p_download dl;
@@ -568,7 +568,7 @@ void cmd(int sockfd){
             up2client.client_init();
             int upsock = up2client.connect_to_server();
             printf("filename :%s\n", filename);
-            //send(upsock, filename, strlen(filename), 0);
+            send(upsock, filename, strlen(filename), 0);
             upload upcmd;
             upcmd.upload_file(upsock, filename);
 			printf("upload complete\n");
