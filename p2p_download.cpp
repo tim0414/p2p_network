@@ -92,7 +92,9 @@ void p2p_download::normal_download(int sockfd, char *filename){
 	int nCount;
 	//sprintf(temp_file, "%d", no);
 	char filename2[64];
-	//read(sockfd, filename, strlen(filename2)+1);
+	memset(&filename, 0, sizeof(filename));
+
+	read(sockfd, filename, strlen(filename2)+1);
 
 	printf("start p2p download, filename %s\n", filename);
 
