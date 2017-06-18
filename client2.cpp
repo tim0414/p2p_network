@@ -330,7 +330,7 @@ static void *send_download_cmd(void *arg){
 	connfd = addr->sockfd;
     char filename[64];
 
-    //recv(connfd, filename, strlen(filename), 0);
+    recv(connfd, filename, strlen(filename), 0);
     printf("before call download fileanem: %s\n", filename);
 
     p2p_download dl;
