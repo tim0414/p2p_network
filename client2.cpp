@@ -568,7 +568,7 @@ void cmd(int sockfd){
             up2client.client_init();
             int upsock = up2client.connect_to_server();
             printf("filename :%s\n", filename);
-            send(upsock, filename, strlen(filename), 0);
+            //send(upsock, filename, strlen(filename), 0);
             upload upcmd;
             upcmd.upload_file(upsock, filename);
 			printf("upload complete\n");
