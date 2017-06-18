@@ -15,6 +15,7 @@
 #include <list>
 using std::list;
 
+
 #define BUF_SIZE 1024
 
 struct address{
@@ -154,7 +155,6 @@ void p2p_download(int sockfd, char *filename, int total, int no){
 	fclose(fp1);
 	//chdir("..");
 	
-
 
 
 }
@@ -482,6 +482,149 @@ void recompose(int file_num, char* filename){
 	//chdir("..");
 }
 
+void cmd(int sockfd);
+
+
+
+void *connect_server(void *arg){
+
+	printf("tread start\n");
+	int sockfd;
+	struct address *addr = (struct address *)arg;
+	struct sockaddr_in addr_svr;
+
+	memset(&addr_svr, 0, sizeof(addr_svr));
+	addr_svr.sin_family = AF_INET;
+	addr_svr.sin_port = htons(addr->port);
+	addr_svr.sin_addr.s_addr = inet_addr(addr->ip);
+
+
+
+	sockfd = socket(AF_INET, SOCK_STREAM, 0);
+	if(sockfd == -1){
+		printf("ERROR: socket()\n");
+		exit(1);
+	}
+
+	if(connect(sockfd, (struct sockaddr *)&addr_svr, 
+		sizeof(addr_svr)) == -1){
+		printf("ERROR: connect()\n");
+		exit(1);
+	}
+	char id[1024];
+	//fgets(buffer, sizeof(buffer), stdin);
+	printf("please enter id: ");
+	fgets(id, 1024, stdin);
+	if(id[strlen(id)-1]=='\n')
+		id[strlen(id)-1]='\0';
+	write(sockfd, id, strlen(id));
+
+	file_exist(sockfd);
+	cmd(sockfd);
+
+	pthread_exit(NULL);
+
+}
+
+static void *wait_for_connect(void *arg){
+	struct address *addr = (struct address *)arg;
+
+	int connfd;
+	connfd = addr->sockfd;
+	char id[1024];
+
+
+
+	//pthread_detach(pthread_self());
+
+	p2p_upload(connfd);
+	close(connfd);
+
+	pthread_exit(NULL);
+	return 0;
+}
+
+
+
+int main(int argc, char **argv)
+{
+	struct sockaddr_in addr_svr;
+	int sockfd, *iptr;
+	pthread_t tid, tid2;
+	uint16_t port = atoi(argv[2]);
+	struct address addr;
+	void * thread_result;
+
+	//connection test;
+	//test.initialize();
+
+	addr.port = port;
+	sprintf(addr.ip, "%s", argv[1]);
+	
+	//memset(&addr_svr, 0, sizeof(addr_svr));
+	//addr_svr.sin_family = AF_INET;
+	//addr_svr.sin_port = htons(port);
+	//addr_svr.sin_addr.s_addr = inet_addr(argv[1]);
+
+	pthread_create(&tid,NULL, connect_server, (void *)&addr);
+
+
+	// TCP server
+	int chat_port = 9999;
+	int tcpfd;
+
+	tcpfd = socket(AF_INET, SOCK_STREAM, 0);
+
+	memset(&addr_svr, 0, sizeof(addr_svr));
+	
+	addr_svr.sin_addr.s_addr = htonl(INADDR_ANY);
+	addr_svr.sin_family = AF_INET;
+	addr_svr.sin_port = htons(chat_port);
+
+	int on = 1;
+	setsockopt(tcpfd, SOL_SOCKET, SO_REUSEADDR, &on, sizeof(on));
+	bind(tcpfd, (struct sockaddr *)&addr_svr, sizeof(addr_svr));
+
+	listen(tcpfd, 10);
+
+	struct sockaddr_in addr_cln;
+	socklen_t sLen = sizeof(addr_cln);
+
+	while(1){
+		printf("waiting for connect\n");
+		struct address addr;
+		int connfd;
+
+
+		connfd = accept(tcpfd, (struct sockaddr *)&addr_cln, &sLen);
+		printf("connection from %s, port %d\n", inet_ntoa(addr_cln.sin_addr), ntohs(addr_cln.sin_port));
+		
+		// store user info
+		addr.port = ntohs(addr_cln.sin_port);
+		sprintf(addr.ip, "%s", inet_ntoa(addr_cln.sin_addr)); 
+		addr.sockfd = connfd;
+
+		if(connfd == -1){
+			//cerr << "ERROR: accept()" << endl;
+			exit(1);
+		}
+		
+		pthread_create(&tid2, NULL, &wait_for_connect, (void*)&addr);
+		
+	}
+
+
+
+
+	pthread_join(tid, &thread_result);
+	pthread_join(tid2, &thread_result);
+
+	printf("here\n");
+	
+
+	return 0;
+}
+
 void cmd(int sockfd){
 
 	char cmd[1024], rcv[1024], dir[1024];
@@ -576,142 +719,5 @@ void cmd(int sockfd){
 		} else
 			printf("wrong cmd\n");
 	}	
-}
-
-
-
-void *connect_server(void *arg){
-
-	printf("tread start\n");
-	int sockfd;
-	struct address *addr = (struct address *)arg;
-	struct sockaddr_in addr_svr;
-
-	memset(&addr_svr, 0, sizeof(addr_svr));
-	addr_svr.sin_family = AF_INET;
-	addr_svr.sin_port = htons(addr->port);
-	addr_svr.sin_addr.s_addr = inet_addr(addr->ip);
-
-
-
-	sockfd = socket(AF_INET, SOCK_STREAM, 0);
-	if(sockfd == -1){
-		printf("ERROR: socket()\n");
-		exit(1);
-	}
-
-	if(connect(sockfd, (struct sockaddr *)&addr_svr, 
-		sizeof(addr_svr)) == -1){
-		printf("ERROR: connect()\n");
-		exit(1);
-	}
-	char id[1024];
-	//fgets(buffer, sizeof(buffer), stdin);
-	printf("please enter id: ");
-	fgets(id, 1024, stdin);
-	if(id[strlen(id)-1]=='\n')
-		id[strlen(id)-1]='\0';
-	write(sockfd, id, strlen(id));
-
-	file_exist(sockfd);
-	cmd(sockfd);
-
-	pthread_exit(NULL);
-
-}
-
-static void *wait_for_connect(void *arg){
-	struct address *addr = (struct address *)arg;
-
-	int connfd;
-	connfd = addr->sockfd;
-	char id[1024];
-
-
-
-	//pthread_detach(pthread_self());
-
-	p2p_upload(connfd);
-	close(connfd);
-
-	pthread_exit(NULL);
-	return 0;
-}
-
-
-int main(int argc, char **argv)
-{
-	struct sockaddr_in addr_svr;
-	int sockfd, *iptr;
-	pthread_t tid, tid2;
-	uint16_t port = atoi(argv[2]);
-	struct address addr;
-	void * thread_result;
-
-	addr.port = port;
-	sprintf(addr.ip, "%s", argv[1]);
-	
-	memset(&addr_svr, 0, sizeof(addr_svr));
-	addr_svr.sin_family = AF_INET;
-	addr_svr.sin_port = htons(port);
-	addr_svr.sin_addr.s_addr = inet_addr(argv[1]);
-
-	pthread_create(&tid,NULL, connect_server, (void *)&addr);
-
-
-	// TCP server
-	int chat_port = 9999;
-	int tcpfd;
-
-	tcpfd = socket(AF_INET, SOCK_STREAM, 0);
-
-	memset(&addr_svr, 0, sizeof(addr_svr));
-	
-	addr_svr.sin_addr.s_addr = htonl(INADDR_ANY);
-	addr_svr.sin_family = AF_INET;
-	addr_svr.sin_port = htons(chat_port);
-
-	int on = 1;
-	setsockopt(tcpfd, SOL_SOCKET, SO_REUSEADDR, &on, sizeof(on));
-	bind(tcpfd, (struct sockaddr *)&addr_svr, sizeof(addr_svr));
-
-	listen(tcpfd, 10);
-
-	struct sockaddr_in addr_cln;
-	socklen_t sLen = sizeof(addr_cln);
-
-	while(1){
-		printf("waiting for connect\n");
-		struct address addr;
-		int connfd;
-
-
-		connfd = accept(tcpfd, (struct sockaddr *)&addr_cln, &sLen);
-		printf("connection from %s, port %d\n", inet_ntoa(addr_cln.sin_addr), ntohs(addr_cln.sin_port));
-		
-		// store user info
-		addr.port = ntohs(addr_cln.sin_port);
-		sprintf(addr.ip, "%s", inet_ntoa(addr_cln.sin_addr)); 
-		addr.sockfd = connfd;
-
-		if(connfd == -1){
-			//cerr << "ERROR: accept()" << endl;
-			exit(1);
-		}
-		
-		pthread_create(&tid2, NULL, &wait_for_connect, (void*)&addr);
-		
-	}
-
-
-
-
-	pthread_join(tid, &thread_result);
-	pthread_join(tid2, &thread_result);
-
-	printf("here\n");
-	
-
-	return 0;
 }
 	
