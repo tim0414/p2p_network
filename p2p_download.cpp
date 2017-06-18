@@ -38,9 +38,17 @@ void p2p_download::download(int sockfd, char *filename, int total, int no){
 	sprintf(temp_file, "%d", no);
 
 	printf("start p2p download, filename %s\n", filename);
-	write(sockfd, &total, sizeof(total));
-	write(sockfd, &no, sizeof(no));
-	
+
+	int success = write(sockfd, &total, sizeof(total));
+	//while(success==-1){
+	//	printf("send failed 1\n");
+	//	success = write(sockfd, &total, sizeof(total));
+	//}
+	int success2 = write(sockfd, &no, sizeof(no));
+	//while(success2 ==-1){
+	//	printf("send failed 2\n");
+	//	success2 = write(sockfd, &no, sizeof(no));
+	//}
 
 	//chdir("file");
 	//strcat(filename, c);
@@ -75,4 +83,50 @@ void p2p_download::download(int sockfd, char *filename, int total, int no){
 	//chdir("..");
 	
 
+}
+
+void p2p_download::normal_download(int sockfd, char *filename){
+	FILE *fp1;
+	//char temp_file[2];
+	char sendline[1024], recvline[2048], buffer[1024];
+	int nCount;
+	//sprintf(temp_file, "%d", no);
+
+	printf("start p2p download, filename %s\n", filename);
+
+	//int success = write(sockfd, &total, sizeof(total));
+
+	//int success2 = write(sockfd, &no, sizeof(no));
+
+	chdir("file");
+
+	fp1 = fopen(filename, "wb");
+
+	printf("p2p filename: %s\n", filename);
+
+	int i = 0;
+	memset(&recvline, 0, sizeof(recvline));
+
+	// start downloading file		
+	while( (nCount = recv(sockfd, recvline, BUFFER_SIZE, 0)) > 0){
+		//printf("start recv\n");
+
+		fwrite(recvline, sizeof(char), nCount, fp1); 
+
+		if(nCount!=BUFFER_SIZE){
+			printf("----------------\n");
+			printf("%d recv success\n", i);
+			printf("nCount is %d, i = %d\n", nCount, i);
+			printf("----------------\n\n");
+			//printf("%s\n", recvline);
+		}
+		send(sockfd, &nCount, sizeof(nCount), 0);
+		memset(&recvline, 0, sizeof(recvline));
+		
+		if(nCount < BUFFER_SIZE) break;
+		i ++;
+	}	
+		//printf("Download complete!\n");
+	fclose(fp1);
+	chdir("..");
 }

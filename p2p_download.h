@@ -20,6 +20,7 @@
 class p2p_download{
     public:
         void download(int sockfd, char *filename, int total, int no);
+        void normal_download(int sockfd, char *filename);
 
 };
 

@@ -132,7 +132,7 @@ int download(int sockfd, char *filename){
 			info.no = no;
 			printf("iter client from %s\n", client_ip);
 			pthread_create(&tid[thread_num], NULL, p2p_connect, (void *)&info);
-			//pthread_join(tid[thread_num], NULL);
+			pthread_join(tid[thread_num], NULL);
 			
 			thread_num++;
 
@@ -332,6 +332,10 @@ static void *send_download_cmd(void *arg){
 
     recv(connfd, filename, strlen(filename)+1, 0);
 
+    p2p_download dl;
+    dl.normal_download(connfd, filename);
+
+/*
     connection download_file;
     download_file.ip = server_ip;
     download_file.port = server_port;
@@ -345,11 +349,17 @@ static void *send_download_cmd(void *arg){
     send(sockfd, &size, sizeof(size), 0);
     //file_exist(sockfd);
     printf("start command\n");
-    send(sockfd, "download\n", strlen("download\n")+1, 0);
+    char cmd[32];
+    sprintf(cmd, "%s", "download\n");
+
+    chdir("file");
+    send(sockfd, cmd, strlen(cmd)+1, 0);
+    
     send(sockfd, filename, strlen(filename)+1, 0);
 
     file_num = download(sockfd, filename);
 	recompose(file_num, filename);
+    chdir("..");*/
 }
 
 
@@ -550,7 +560,10 @@ void cmd(int sockfd){
             
             up2client.client_init();
             int upsock = up2client.connect_to_server();
-            send(upsock, filename, strlen(filename)+1, 0);
+            upload upcmd;
+            upcmd.upload_file(upsock, filename);
+			printf("upload complete\n");
+            //send(upsock, filename, strlen(filename)+1, 0);
 
 		// ls cmd
 		} else if(strcmp(cmd, "ls\n") == 0){
