@@ -334,6 +334,7 @@ static void *send_download_cmd(void *arg){
     printf("before call download fileanem: %s\n", filename);
 
     p2p_download dl;
+    sprintf(filename, "%s", "cover.jpeg");
     dl.normal_download(connfd, filename);
 
 /*
@@ -564,6 +565,8 @@ void cmd(int sockfd){
             
             up2client.client_init();
             int upsock = up2client.connect_to_server();
+            printf("filename :%s\n", filename);
+            send(upsock, filename, strlen(filename)+1, 0);
             upload upcmd;
             upcmd.upload_file(upsock, filename);
 			printf("upload complete\n");
