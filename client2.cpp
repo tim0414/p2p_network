@@ -336,7 +336,7 @@ static void *send_download_cmd(void *arg){
     p2p_download dl;
     //memset(&filename, 0, sizeof(filename));
     read(connfd, filename, strlen(filename)+1);
-    //sprintf(filename, "%s", "cover.jpeg");
+    sprintf(filename, "%s", "downloadfiles");
     dl.normal_download(connfd, filename);
 
 /*
